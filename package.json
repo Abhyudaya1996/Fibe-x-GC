@@ -1,0 +1,19 @@
+{
+  "name": "fibe-gc-demo",
+  "version": "1.0.0",
+  "description": "Fibe x Great.Cards credit card recommendation integration demo",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js",
+    "start": "node server.js",
+    "share": "npx localtunnel --port 3000"
+  },
+  "dependencies": {
+    "axios": "^1.7.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
