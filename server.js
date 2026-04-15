@@ -149,6 +149,25 @@ app.post('/api/eligibility', handle(async (req, res) => {
   res.json({ ok: true, data: upstream.data });
 }));
 
+// GET /api/city/:pincode — resolve Indian pincode → city name via India Post
+app.get('/api/city/:pincode', handle(async (req, res) => {
+  const { pincode } = req.params;
+  if (!/^\d{6}$/.test(pincode)) return res.status(400).json({ ok: false, error: 'Invalid pincode' });
+
+  const upstream = await axios.get(`https://api.postalpincode.in/pincode/${pincode}`, { timeout: 8000 });
+  const result   = upstream.data?.[0];
+
+  if (!result || result.Status !== 'Success' || !result.PostOffice?.length) {
+    return res.json({ ok: false, error: 'Pincode not found' });
+  }
+
+  const po       = result.PostOffice[0];
+  const city     = po.District || po.Division || po.Name || '';
+  const state_   = po.State || '';
+
+  res.json({ ok: true, city, state: state_, pincode });
+}));
+
 // SPA fallback
 app.get('*', (_req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));

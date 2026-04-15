@@ -13,6 +13,7 @@ const state = {
   activeScreen:   'home',
   dirty: new Set(['home', 'rejection', 'thankyou', 'repayment', 'email']),
   bankMap: {},        // bank_id → bank name (populated from init bundle)
+  bankLogoMap: {},    // bank_id → logo URL (populated from init bundle)
   initCards: [],      // full card list from init bundle
 };
 
@@ -137,7 +138,10 @@ async function loadInitBundle() {
 
     // bank_data is an array of { id, name, logo }
     const banks = inner.bank_data || [];
-    banks.forEach(b => { state.bankMap[b.id] = b.name; });
+    banks.forEach(b => {
+      state.bankMap[b.id]     = b.name;
+      state.bankLogoMap[b.id] = b.logo || null;
+    });
 
     state.initCards = inner.card_data || [];
     state.initLoaded = true;
@@ -155,8 +159,12 @@ function normalizeCalcCard(raw) {
   const alias       = raw.seo_card_alias || raw.card_alias || raw.alias || '';
   const name        = (raw.card_name || raw.name || 'Credit Card').trim().slice(0, 30);
   const image       = raw.image || '';
-  const bankId      = raw.bank_id;
+  // calculate endpoint uses network bank_id (e.g. Amex) not issuer bank_id (e.g. SBI)
+  // initCards (from init-bundle card_data) has the correct issuer bank_id — use that
+  const initCard    = state.initCards.find(c => (c.seo_card_alias || c.card_alias) === alias);
+  const bankId      = initCard?.bank_id || raw.bank_id;
   const bank        = bankId ? bankName(bankId) : (raw.bank_name || '');
+  const bankLogo    = bankId ? (state.bankLogoMap[bankId] || null) : null;
   const joiningFee  = parseFloat(raw.joining_fees || 0);
   const annualFee   = parseFloat(raw.annual_fee || raw.annual_fee_text || raw.joining_fees || 0);
   const isLTF       = joiningFee === 0 && annualFee === 0;
@@ -173,7 +181,7 @@ function normalizeCalcCard(raw) {
   const applyUrl    = rawUrl ? rawUrl + 'AB' : null;
 
   return {
-    alias, name, bank, image,
+    alias, name, bank, bankLogo, image,
     annualFee: joiningFee > 0 ? joiningFee : annualFee,
     isLifetimeFree: isLTF,
     netSavings,
@@ -271,7 +279,10 @@ function cardTileHTML(card, nudge, { ctaText = 'Apply Now', showEligibility = fa
           <div class="card-img-wrap">${imgHTML}${placeholderHTML}</div>
           <div class="card-info">
             <div class="card-name">${card.name}</div>
-            <div class="card-bank">${card.bank}</div>
+            <div class="card-bank">
+              ${card.bankLogo ? `<img src="${card.bankLogo}" alt="${card.bank}" class="bank-logo" onerror="this.style.display='none'">` : ''}
+              ${card.bank}
+            </div>
             <div class="card-fee-wrap">${feeHTML} ${eligiBadge}</div>
           </div>
         </div>
@@ -674,6 +685,43 @@ function markAllDirty() {
   SCREEN_INITS[state.activeScreen]?.();
 }
 
+function salaryInWords(amount) {
+  if (!amount || isNaN(amount)) return '';
+  const n = parseInt(amount, 10);
+  if (n >= 10000000) return `₹${(n / 10000000).toFixed(1).replace(/\.0$/, '')} Cr / month`;
+  if (n >= 100000)   return `₹${(n / 100000).toFixed(1).replace(/\.0$/, '')} Lakh / month`;
+  if (n >= 1000)     return `₹${(n / 1000).toFixed(1).replace(/\.0$/, '')}K / month`;
+  return `₹${n.toLocaleString('en-IN')} / month`;
+}
+
+let _cityLookupTimer = null;
+async function lookupCity(pincode) {
+  const el = document.getElementById('cityDisplay');
+  if (!el) return;
+  if (!/^\d{6}$/.test(pincode)) {
+    el.textContent = '';
+    return;
+  }
+  clearTimeout(_cityLookupTimer);
+  _cityLookupTimer = setTimeout(async () => {
+    el.textContent = 'Looking up…';
+    el.classList.remove('text-red-500');
+    el.classList.add('text-primary');
+    try {
+      const res  = await fetch(`/api/city/${pincode}`);
+      const data = await res.json();
+      if (data.ok) {
+        el.textContent = `${data.city}, ${data.state}`;
+      } else {
+        el.textContent = 'Pincode not found';
+        el.classList.replace('text-primary', 'text-red-500');
+      }
+    } catch {
+      el.textContent = '';
+    }
+  }, 600);
+}
+
 function applyControls() {
   const slider  = document.getElementById('ctrlScore');
   const income  = document.getElementById('ctrlIncome');
@@ -741,6 +789,9 @@ async function checkApiStatus() {
 document.addEventListener('DOMContentLoaded', async () => {
   setupControlPanel();
   checkApiStatus();
+  lookupCity(state.pincode);   // seed city display for default pincode
+  const salEl = document.getElementById('salaryDisplay');
+  if (salEl) salEl.textContent = salaryInWords(state.monthlyIncome);
   await loadInitBundle();
   // Start on landing page
   navigateTo('landing');

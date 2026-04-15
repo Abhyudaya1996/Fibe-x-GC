@@ -92,7 +92,9 @@ tailwind.config = {
     <div class="space-y-1.5">
       <span class="text-xs font-label font-semibold text-outline uppercase tracking-wider">Monthly Income (Rs.)</span>
       <input type="number" id="ctrlIncome" value="65000" min="10000" max="500000" step="1000"
+        oninput="document.getElementById('salaryDisplay').textContent = salaryInWords(this.value)"
         class="w-full px-3 py-2 bg-surface-container-high rounded-xl text-sm font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary/30 border-0"/>
+      <div id="salaryDisplay" class="text-xs text-primary font-medium min-h-[16px] px-1">₹65K / month</div>
     </div>
     <!-- Employment -->
     <div class="space-y-1.5">
@@ -106,7 +108,9 @@ tailwind.config = {
     <div class="space-y-1.5">
       <span class="text-xs font-label font-semibold text-outline uppercase tracking-wider">Pincode</span>
       <input type="text" id="ctrlPincode" value="400001" maxlength="6" pattern="[0-9]{6}"
+        oninput="lookupCity(this.value)"
         class="w-full px-3 py-2 bg-surface-container-high rounded-xl text-sm font-medium text-on-surface outline-none focus:ring-2 focus:ring-primary/30 border-0"/>
+      <div id="cityDisplay" class="text-xs text-primary font-medium min-h-[16px] px-1">Mumbai, Maharashtra</div>
     </div>
     <!-- Submit -->
     <button onclick="applyControls()" class="w-full py-2.5 rounded-xl text-sm font-bold text-white editorial-gradient transition-opacity hover:opacity-90 active:opacity-80">
