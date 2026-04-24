@@ -1894,6 +1894,48 @@ function renderNotifCohort() {
   else paintPhoneNotif(c, c.messages[notifState.msgIndex]);
 }
 
+// Resolve personalization brackets AND strip spec meta copy before rendering.
+// Every bracketed variable has a fallback (see docs/05-NOTIFICATIONS-COPY.md § Fallback).
+// Order: (1) pick top eligible cards for this user, (2) substitute, (3) scrub "Fallback:..." sentences.
+function topEligibleCards(n = 3) {
+  const score = bucketScore(state.creditScore);
+  const income = roundIncome(state.monthlyIncome);
+  const cards = (state.initCards || []).filter(c =>
+    (!c.employment_type || c.employment_type === 'both' || c.employment_type === state.employmentType) &&
+    parseFloat(c.crif || 0) <= score &&
+    parseFloat(c.income || 0) <= income
+  );
+  return cards.slice(0, n).map(normalizeCard).filter(Boolean);
+}
+
+function resolveNotifVars(text, ctx) {
+  if (!text) return text;
+  const top = ctx.top3 || [];
+  const lead = top[0];
+  const leadName = lead ? shortCardName(lead.name) : 'HDFC MoneyBack+';
+  const top3Str = top.length >= 3
+    ? top.slice(0, 3).map(c => shortCardName(c.name)).join(' · ')
+    : 'Axis Ace · HDFC MoneyBack+ · SBI SimplyClick';
+  const savings = '₹' + fmt(ctx.savings || 12000);
+  return String(text)
+    // Card-name variants
+    .replace(/\[Spend-matched card(?: name)?\]/gi, leadName)
+    .replace(/\[Top card name\]/gi, leadName)
+    .replace(/\[Card name\]/gi, leadName)
+    .replace(/\[Highest-saving card(?: for your profile)?\]/gi, leadName)
+    .replace(/\[Complementary stacking card\]/gi, leadName)
+    // List variant
+    .replace(/\[Top 3 cards\]/gi, top3Str)
+    // ₹ variants — handle [₹ savings/yr], [₹X]/yr, [₹X]
+    .replace(/\[₹\s*savings\/yr\]/gi, savings + '/yr')
+    .replace(/\[₹X\]\/yr/gi, savings + '/yr')
+    .replace(/\[₹X\]/gi, savings)
+    // Strip spec-meta "Fallback: ..." sentences (PM-facing, not user-facing)
+    .replace(/\s*Fallback:[^.]*\.\s*/g, ' ')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
 function paintPhoneSilent(c) {
   const phone = document.getElementById('phoneInner');
   phone.innerHTML = `
@@ -1909,11 +1951,28 @@ function paintPhoneNotif(c, m) {
   const phone = document.getElementById('phoneInner');
   if (!m) return;
 
+  // Resolve personalization variables + strip spec meta before rendering.
+  const top3 = topEligibleCards(3);
+  const ctx = { top3, savings: 12000 };
+  const title = resolveNotifVars(m.title || '', ctx);
+  const body = resolveNotifVars(m.body || '', ctx);
+  const subject = resolveNotifVars(m.subject || '', ctx);
+  const preheader = resolveNotifVars(m.preheader || '', ctx);
+  const cta = resolveNotifVars(m.cta || '', ctx);
+  const lead = top3[0];
+
+  // Only inject a card-face when the ORIGINAL copy referenced a card variable
+  // or when the cohort is card-centric and we have an eligible lead card.
+  const referencedCard = /\[(?:Card name|Spend-matched card|Top card name|Top 3 cards|Highest-saving card|Complementary stacking card)\]/i.test(
+    (m.title || '') + ' ' + (m.body || '')
+  );
+  const showFace = lead && referencedCard;
+
   if (m.type === 'push') {
     phone.innerHTML = `
       <div style="height:100%;background:linear-gradient(135deg,#1e293b 0%,#0f172a 100%);padding:44px 12px 12px 12px;display:flex;flex-direction:column">
         <div style="text-align:center;color:#cbd5e1;margin-bottom:8px">
-          <div style="font-size:60px;font-weight:300;line-height:1;letter-spacing:-0.02em">${m.time.split(' ')[0] || '10:00'}</div>
+          <div style="font-size:60px;font-weight:300;line-height:1;letter-spacing:-0.02em">${(m.time || '').split(' ')[0] || '10:00'}</div>
           <div style="font-size:14px;font-weight:500;margin-top:4px;opacity:0.9">Day ${m.day} · Tuesday</div>
         </div>
         <div style="flex:1;display:flex;flex-direction:column;justify-content:flex-end;gap:10px;padding-bottom:20px">
@@ -1924,10 +1983,19 @@ function paintPhoneNotif(c, m) {
               ${m.hook ? `<span style="font-size:9px;font-weight:700;color:#c4b5fd;background:rgba(139,92,246,0.2);padding:1px 5px;border-radius:3px">${m.hook}</span>` : ''}
               <div style="margin-left:auto;font-size:10px;color:#94a3b8">now</div>
             </div>
-            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;line-height:1.3">${escapeHtml(m.title)}</div>
-            <div style="font-size:12px;color:#e2e8f0;line-height:1.4">${escapeHtml(m.body)}</div>
+            <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:3px;line-height:1.3">${escapeHtml(title)}</div>
+            <div style="font-size:12px;color:#e2e8f0;line-height:1.4">${escapeHtml(body)}</div>
+            ${showFace ? `
+              <div style="display:flex;gap:8px;align-items:center;margin-top:10px;padding:8px;background:rgba(255,255,255,0.08);border-radius:10px">
+                ${renderCardFace(lead, { size: 'sm' })}
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:11px;font-weight:700;color:#fff;line-height:1.2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(shortCardName(lead.name))}</div>
+                  <div style="font-size:9.5px;color:#94a3b8;margin-top:1px">${lead.isLTF ? 'Lifetime free' : 'Premium card'}</div>
+                </div>
+              </div>
+            ` : ''}
           </div>
-          ${m.cta ? `<div style="background:#006767;color:#fff;font-size:12px;font-weight:700;padding:10px 14px;border-radius:12px;text-align:center">${escapeHtml(m.cta)}</div>` : ''}
+          ${cta ? `<div style="background:#006767;color:#fff;font-size:12px;font-weight:700;padding:10px 14px;border-radius:12px;text-align:center">${escapeHtml(cta)}</div>` : ''}
         </div>
       </div>
     `;
@@ -1943,10 +2011,20 @@ function paintPhoneNotif(c, m) {
           </div>
         </div>
         ${m.hook ? `<div style="display:inline-block;font-size:9px;font-weight:700;color:#6d28d9;background:#ede9fe;padding:2px 7px;border-radius:3px;margin-bottom:6px;letter-spacing:0.04em">${m.hook}</div>` : ''}
-        <div style="font-size:14px;font-weight:700;color:#191c1d;line-height:1.35;margin-bottom:4px">${escapeHtml(m.subject)}</div>
-        <div style="font-size:11px;color:#64748b;margin-bottom:14px;font-style:italic">${escapeHtml(m.preheader || '')}</div>
-        <div style="font-size:12.5px;color:#334155;line-height:1.55;white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif">${escapeHtml(m.body)}</div>
-        ${m.cta ? `<div style="background:#006767;color:#fff;font-size:12px;font-weight:700;padding:10px 14px;border-radius:8px;text-align:center;margin-top:16px;display:inline-block">${escapeHtml(m.cta)} →</div>` : ''}
+        <div style="font-size:14px;font-weight:700;color:#191c1d;line-height:1.35;margin-bottom:4px">${escapeHtml(subject)}</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:14px;font-style:italic">${escapeHtml(preheader)}</div>
+        ${showFace ? `
+          <div style="display:flex;gap:10px;align-items:center;padding:10px;background:#f8fafc;border-radius:10px;margin-bottom:14px">
+            ${renderCardFace(lead, { size: 'md' })}
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:700;color:#191c1d;line-height:1.2">${escapeHtml(shortCardName(lead.name))}</div>
+              <div style="font-size:11px;color:#64748b;margin-top:2px">${lead.bank || ''}</div>
+              ${lead.isLTF ? `<div style="display:inline-block;font-size:9px;font-weight:700;color:#006767;background:#00676715;padding:2px 6px;border-radius:4px;margin-top:4px;letter-spacing:0.04em;text-transform:uppercase">Lifetime free</div>` : ''}
+            </div>
+          </div>
+        ` : ''}
+        <div style="font-size:12.5px;color:#334155;line-height:1.55;white-space:pre-wrap;font-family:'Plus Jakarta Sans',sans-serif">${escapeHtml(body)}</div>
+        ${cta ? `<div style="background:#006767;color:#fff;font-size:12px;font-weight:700;padding:10px 14px;border-radius:8px;text-align:center;margin-top:16px;display:inline-block">${escapeHtml(cta)} →</div>` : ''}
       </div>
     `;
   }
