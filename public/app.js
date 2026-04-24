@@ -32,15 +32,36 @@ const state = {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const PLACEMENTS = [
-  { id: 1, name: 'Homepage widget',              blurb: 'Trending tile → webview funnel (categories + spend slider)',  filter: { match: true },         n: 3 },
-  { id: 2, name: 'Loan declined',                blurb: 'FD section → GC webview · secured cards',                     filter: { secured: true },       n: 4 },
-  { id: 3, name: 'Post-disbursal thank-you',     blurb: 'Confetti success screen · card CTA',                          filter: { premium: true },       n: 2 },
-  { id: 4, name: 'EMI tracker / repayment',      blurb: 'EMI schedule page · "rewards pay your EMI" card',             filter: { ltf: true },           n: 2 },
-  { id: 5, name: 'Sanctioned email',             blurb: 'Email body, deep-links back to app',                          filter: { premium: true },       n: 2, email: true },
-  { id: 6, name: 'Trending row tile',            blurb: 'Featured LTF card of the week in Trending carousel',          filter: { ltf: true, popular: true }, n: 1 },
-  { id: 7, name: 'Tailor-made offers carousel',  blurb: 'Credit-score page · "Super offer" 2-col grid slot',           filter: { match: true },         n: 3, carousel: true },
-  { id: 8, name: 'Play & Win — LTF unlock',      blurb: 'Slash-the-Fruits reward surface · 3-win unlock',              filter: { ltf: true },           n: 3, game: true },
+  { id: 1, name: 'Homepage widget',              blurb: 'Trending tile → webview funnel (categories + spend slider)',  filter: { match: true },         n: 3,
+    tryThis: 'Tap the orange "Find your best card" tile in the phone. Pick 2-3 categories, set spend per category on the sliders, and watch three matched cards appear. Change the credit-score pill above — eligibility flips the list in real time.' },
+  { id: 2, name: 'Loan declined',                blurb: 'FD section → GC webview · secured cards',                     filter: { secured: true },       n: 4,
+    tryThis: 'This is what a rejected user sees instead of dead-end messaging. The FD-backed card pitch lives inside the FD section they already trust. Switch pincode to 400088 vs 400001 to see the served-vs-unserved fork.' },
+  { id: 3, name: 'Post-disbursal thank-you',     blurb: 'Confetti success screen · card CTA',                          filter: { premium: true },       n: 2,
+    tryThis: 'Fires ~2 hrs after disbursal — psychological peak for cross-sell. Notice the card CTA sits BELOW the celebration, not inside it. Emotion first, card second. This is priority #1 in the system.' },
+  { id: 4, name: 'EMI tracker / repayment',      blurb: 'EMI schedule page · "rewards pay your EMI" card',             filter: { ltf: true },           n: 2,
+    tryThis: 'User opens this to check their loan. The card tile is placed where the "rewards = 1 free EMI" math clicks fastest. Bump income higher to see the reward-offset math scale with spend capacity.' },
+  { id: 5, name: 'Sanctioned email',             blurb: 'Email body, deep-links back to app',                          filter: { premium: true },       n: 2, email: true,
+    tryThis: 'Email preview — not a phone screen. Ships at approval + 24 hrs. Deep-links back to the app with card reco pre-loaded. Change credit score to see the card pick rotate from LTF → premium.' },
+  { id: 6, name: 'Trending row tile',            blurb: 'Featured LTF card of the week in Trending carousel',          filter: { ltf: true, popular: true }, n: 1,
+    tryThis: 'One featured card, high-impact placement. Change the credit score pill to see the featured card rotate — low scores surface LTF, high scores surface premium.' },
+  { id: 7, name: 'Tailor-made offers carousel',  blurb: 'Credit-score page · "Super offer" 2-col grid slot',           filter: { match: true },         n: 3, carousel: true,
+    tryThis: 'Users on this page already care about their score. The 3-card grid reshuffles on every profile change. Try toggling Salaried ↔ Self-employed — different cards surface.' },
+  { id: 8, name: 'Play & Win — LTF unlock',      blurb: 'Slash-the-Fruits reward surface · 3-win unlock',              filter: { ltf: true },           n: 3, game: true,
+    tryThis: 'Gamified LTF unlock. 3 wins in Slash-the-Fruits = free card. The unlocked card matches user eligibility — change score to see the reward change.' },
 ];
+
+// Per-category spend defaults (₹/mo) + reward rates used for projected earnings.
+// These power the multi-slider step in Placement 1 and any hook that reuses it.
+const CATEGORY_META = {
+  online:  { defaultSpend: 15000, rate: 0.05, q: 'How much do you spend online each month?' },
+  fuel:    { defaultSpend: 8000,  rate: 0.05, q: 'How much do you spend on fuel each month?' },
+  dining:  { defaultSpend: 5000,  rate: 0.05, q: 'How much do you spend on dining out each month?' },
+  travel:  { defaultSpend: 10000, rate: 0.04, q: 'How much do you spend on travel each month?' },
+  grocery: { defaultSpend: 8000,  rate: 0.03, q: 'How much do you spend on groceries each month?' },
+  bills:   { defaultSpend: 4000,  rate: 0.02, q: 'How much do you spend on utility bills each month?' },
+  ott:     { defaultSpend: 1500,  rate: 0.02, q: 'How much do you spend on OTT & gaming each month?' },
+  edu:     { defaultSpend: 3000,  rate: 0.01, q: 'How much do you spend on education each month?' },
+};
 
 const LOAN_PURPOSE_SPEND = {
   travel:    { flights_annual: 60000,  hotels_annual: 30000 },
@@ -404,6 +425,7 @@ function renderPlacementsTab() {
         `).join('')}
       </div>
     </div>
+    <div id="placementTryThis"></div>
   `;
   extra.querySelectorAll('.placement-item').forEach(el => {
     el.addEventListener('click', () => {
@@ -412,9 +434,29 @@ function renderPlacementsTab() {
       extra.querySelectorAll('.placement-item').forEach(x => x.classList.remove('active'));
       el.classList.add('active');
       renderPlacement(pid);
+      renderPlacementTryThis(pid);
     });
   });
   renderPlacement(state.activePlacement);
+  renderPlacementTryThis(state.activePlacement);
+}
+
+// Stakeholder commentary — tells the reader exactly what to do on this placement.
+// Shown in the right strip, below the placement list, auto-refreshes on selection.
+function renderPlacementTryThis(pid) {
+  const wrap = document.getElementById('placementTryThis');
+  if (!wrap) return;
+  const p = PLACEMENTS.find(x => x.id === pid);
+  if (!p) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `
+    <div style="margin-top:14px;background:rgba(94,234,212,0.08);border:1px solid rgba(94,234,212,0.25);border-radius:12px;padding:14px 16px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:10px;font-weight:800;letter-spacing:0.18em;color:#5eead4;text-transform:uppercase">Try this →</span>
+        <span style="font-size:11px;color:#94a3b8">Placement ${p.id} · ${escapeHtml(p.name)}</span>
+      </div>
+      <p style="font-size:12.5px;color:#e2e8f0;line-height:1.55">${escapeHtml(p.tryThis || '')}</p>
+    </div>
+  `;
 }
 
 function refreshActivePlacement() {
@@ -426,7 +468,7 @@ function refreshActivePlacement() {
 // Each placement is a Fibe-native surface, not a generic card-list shell.
 // Hooks (Tab 3) re-use these renderers via renderHookSurface(surface, cards, hook).
 
-let p1FunnelState = { step: 0, cats: [], spend: 30000 };
+let p1FunnelState = { step: 0, cats: [], spendByCat: {} };
 
 function renderPlacement(pid) {
   const p = PLACEMENTS.find(x => x.id === pid);
@@ -434,7 +476,7 @@ function renderPlacement(pid) {
   const phone = document.getElementById('phoneInner');
   const cards = filterInitCards(p);
   // reset P1 funnel state on re-entry
-  if (pid === 1) p1FunnelState = { step: 0, cats: [], spend: 30000 };
+  if (pid === 1) p1FunnelState = { step: 0, cats: [], spendByCat: {} };
   renderPlacementSurface(p, cards, phone);
 }
 
@@ -894,7 +936,26 @@ function renderP1_Step2_Categories(phone) {
 }
 
 function renderP1_Step3_Slider(phone) {
-  const v = p1FunnelState.spend;
+  // Seed default spend for any newly-picked category that doesn't have a value yet.
+  p1FunnelState.cats.forEach(k => {
+    if (!(k in p1FunnelState.spendByCat)) {
+      p1FunnelState.spendByCat[k] = (CATEGORY_META[k] || {}).defaultSpend || 5000;
+    }
+  });
+  // Drop values for categories user de-selected.
+  Object.keys(p1FunnelState.spendByCat).forEach(k => {
+    if (!p1FunnelState.cats.includes(k)) delete p1FunnelState.spendByCat[k];
+  });
+
+  const catObjs = p1FunnelState.cats.map(k => {
+    const c = CATEGORIES.find(x => x.k === k);
+    const meta = CATEGORY_META[k] || { defaultSpend: 5000, rate: 0.02, q: 'How much do you spend each month?' };
+    return { ...c, ...meta, spend: p1FunnelState.spendByCat[k] };
+  });
+
+  const total = () => catObjs.reduce((s, c) => s + (p1FunnelState.spendByCat[c.k] || 0), 0);
+  const earn = () => Math.round(catObjs.reduce((s, c) => s + (p1FunnelState.spendByCat[c.k] || 0) * 12 * c.rate, 0));
+
   phone.innerHTML = `
     <div style="position:relative;height:100%;background:#fff;display:flex;flex-direction:column">
       <div class="fi-header">
@@ -907,18 +968,34 @@ function renderP1_Step3_Slider(phone) {
           <div style="flex:1;height:4px;background:#006767;border-radius:2px"></div>
           <div style="flex:1;height:4px;background:#e7e8e9;border-radius:2px"></div>
         </div>
-        <div style="font-size:17px;font-weight:800;color:#191c1d;line-height:1.3;margin-bottom:4px">How much do you spend each month?</div>
-        <div style="font-size:12.5px;color:#64748b;margin-bottom:28px;line-height:1.45">Across ${p1FunnelState.cats.length} selected categor${p1FunnelState.cats.length > 1 ? 'ies' : 'y'}. Total, not per category.</div>
-        <div style="text-align:center;margin-bottom:8px">
-          <div style="font-size:38px;font-weight:800;color:#006767;letter-spacing:-0.02em">₹<span id="p1Val">${fmt(v)}</span></div>
-          <div style="font-size:11px;color:#64748b;font-weight:500">per month</div>
-        </div>
-        <input type="range" id="p1Slider" min="5000" max="200000" step="1000" value="${v}" style="width:100%;accent-color:#006767;margin-top:16px"/>
-        <div style="display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-top:4px"><span>₹5K</span><span>₹2L</span></div>
-        <div style="margin-top:32px;padding:14px;background:#F7F8FA;border-radius:10px;font-size:12px;color:#334155;line-height:1.5">
-          <b style="color:#191c1d">At this spend level, the right card can earn you up to</b>
-          <div style="color:#006767;font-size:20px;font-weight:800;margin-top:4px">₹<span id="p1Earn">${fmt(Math.round(v * 12 * 0.03))}</span>/yr</div>
-          <div style="font-size:10.5px;color:#64748b;margin-top:2px">in cashback & rewards</div>
+        <div style="font-size:17px;font-weight:800;color:#191c1d;line-height:1.3;margin-bottom:4px">Your monthly spend</div>
+        <div style="font-size:12.5px;color:#64748b;margin-bottom:18px;line-height:1.45">Set each category. We'll match the card that pays back the most on your actual mix.</div>
+
+        ${catObjs.map(c => `
+          <div style="margin-bottom:18px;padding:14px;background:#F7F8FA;border-radius:12px">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+              <span style="font-size:18px">${c.icon}</span>
+              <span style="font-size:13px;font-weight:700;color:#191c1d">${c.q}</span>
+            </div>
+            <div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:6px">
+              <div style="font-size:22px;font-weight:800;color:#006767;letter-spacing:-0.01em">₹<span data-v="${c.k}">${fmt(c.spend)}</span></div>
+              <div style="font-size:10px;color:#64748b;font-weight:500">per month</div>
+            </div>
+            <input type="range" data-cat="${c.k}" min="0" max="80000" step="500" value="${c.spend}" style="width:100%;accent-color:#006767"/>
+            <div style="display:flex;justify-content:space-between;font-size:9.5px;color:#94a3b8;margin-top:2px"><span>₹0</span><span>₹80K</span></div>
+          </div>
+        `).join('')}
+
+        <div style="margin-top:8px;padding:14px;background:linear-gradient(135deg,#00676710,#00828210);border:1px solid #00676725;border-radius:12px;font-size:12px;color:#334155;line-height:1.5">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px">
+            <span style="color:#64748b;font-size:11px">Total monthly spend</span>
+            <span style="font-weight:700;color:#191c1d">₹<span id="p1Total">${fmt(total())}</span></span>
+          </div>
+          <div style="border-top:1px dashed #00676735;padding-top:8px">
+            <b style="color:#191c1d;font-size:11px">At this mix, the right card earns you up to</b>
+            <div style="color:#006767;font-size:22px;font-weight:800;margin-top:2px">₹<span id="p1Earn">${fmt(earn())}</span>/yr</div>
+            <div style="font-size:10.5px;color:#64748b;margin-top:2px">in cashback & rewards</div>
+          </div>
         </div>
       </div>
       <div style="padding:12px 16px 16px;border-top:1px solid #e7e8e9;background:#fff">
@@ -927,10 +1004,16 @@ function renderP1_Step3_Slider(phone) {
     </div>
   `;
   document.getElementById('p1Back').addEventListener('click', () => { p1FunnelState.step = 2; renderP1_Step2_Categories(phone); });
-  document.getElementById('p1Slider').addEventListener('input', (e) => {
-    p1FunnelState.spend = parseInt(e.target.value, 10);
-    document.getElementById('p1Val').textContent = fmt(p1FunnelState.spend);
-    document.getElementById('p1Earn').textContent = fmt(Math.round(p1FunnelState.spend * 12 * 0.03));
+  phone.querySelectorAll('input[type="range"][data-cat]').forEach(sl => {
+    sl.addEventListener('input', (e) => {
+      const k = e.target.dataset.cat;
+      const v = parseInt(e.target.value, 10);
+      p1FunnelState.spendByCat[k] = v;
+      const valEl = phone.querySelector(`[data-v="${k}"]`);
+      if (valEl) valEl.textContent = fmt(v);
+      document.getElementById('p1Total').textContent = fmt(total());
+      document.getElementById('p1Earn').textContent = fmt(earn());
+    });
   });
   document.getElementById('p1Next').addEventListener('click', () => {
     p1FunnelState.step = 4;
@@ -939,9 +1022,18 @@ function renderP1_Step3_Slider(phone) {
 }
 
 function renderP1_Step4_Cards(phone, cards) {
-  const spend = p1FunnelState.spend;
-  // rough per-card savings estimate — category-agnostic 3% blended
-  const withSav = cards.slice(0, 3).map((c, i) => ({ ...c, _sav: Math.round(spend * 12 * (0.035 - i * 0.005)) }));
+  const spendByCat = p1FunnelState.spendByCat || {};
+  const totalSpend = Object.values(spendByCat).reduce((s, v) => s + v, 0);
+  // Weighted savings: sum of (category spend × category rate), tier each card slightly lower than best
+  const weighted = Object.keys(spendByCat).reduce(
+    (s, k) => s + (spendByCat[k] || 0) * 12 * ((CATEGORY_META[k] || {}).rate || 0.02),
+    0
+  );
+  const best = Math.round(weighted);
+  const withSav = cards.slice(0, 3).map((c, i) => ({
+    ...c,
+    _sav: Math.round(best * (1 - i * 0.18)), // 100% / 82% / 64% of best
+  }));
   phone.innerHTML = `
     <div style="position:relative;height:100%;background:#F7F8FA;display:flex;flex-direction:column">
       <div class="fi-header">
@@ -950,7 +1042,7 @@ function renderP1_Step4_Cards(phone, cards) {
       </div>
       <div style="flex:1;overflow-y:auto;padding:16px">
         <div style="font-size:15px;font-weight:800;color:#191c1d;margin-bottom:4px">${cards.length ? '3 cards tailored to your spend' : 'No cards matched'}</div>
-        <div style="font-size:12px;color:#64748b;margin-bottom:14px">Top pick first · based on ${p1FunnelState.cats.length} categor${p1FunnelState.cats.length > 1 ? 'ies' : 'y'} and ₹${fmt(spend)}/mo</div>
+        <div style="font-size:12px;color:#64748b;margin-bottom:14px">Top pick first · based on ${p1FunnelState.cats.length} categor${p1FunnelState.cats.length > 1 ? 'ies' : 'y'} and ₹${fmt(totalSpend)}/mo total</div>
         ${withSav.length ? withSav.map((c, i) => `
           <div style="position:relative">
             ${i === 0 ? '<div style="position:absolute;top:-6px;left:10px;background:#006767;color:#fff;font-size:9px;font-weight:800;padding:3px 8px;border-radius:4px;letter-spacing:0.04em;z-index:2">BEST MATCH</div>' : ''}
@@ -962,7 +1054,7 @@ function renderP1_Step4_Cards(phone, cards) {
     </div>
   `;
   document.getElementById('p1Back').addEventListener('click', () => { p1FunnelState.step = 3; renderP1_Step3_Slider(phone); });
-  document.getElementById('p1Restart').addEventListener('click', () => { p1FunnelState = { step: 0, cats: [], spend: 30000 }; renderP1_Step0_HomeTile(phone, cards); });
+  document.getElementById('p1Restart').addEventListener('click', () => { p1FunnelState = { step: 0, cats: [], spendByCat: {} }; renderP1_Step0_HomeTile(phone, cards); });
 }
 
 // ── Placement 2: FD section entry → GC webview secured cards ────────────────
