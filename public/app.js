@@ -33,7 +33,7 @@ const state = {
 
 const PLACEMENTS = [
   { id: 1, name: 'Homepage widget',              blurb: 'Trending tile → webview funnel (categories + spend slider)',  filter: { match: true },         n: 3,
-    tryThis: 'Tap the orange "Find your best card" tile in the phone. Pick 2-3 categories, set spend per category on the sliders, and watch three matched cards appear. Change the credit-score pill above — eligibility flips the list in real time.' },
+    tryThis: 'Inside the phone, scroll down past the teal "10 YEARS" hero, past the Instant Cash / Credit Score snap cards, past "Hand-picked for you" and the "Fibe HUB" pill. Stop at the "Trending" row. Swipe that row sideways (it scrolls horizontally) — skip past the Vouchers and Fixed Deposits tiles until you hit the pulsing teal tile labelled "✨ POWERED BY GREAT.CARDS · Find your best credit card". Tap it to launch the funnel, pick 2–3 categories, set ₹ spend per category on the sliders, and watch three matched cards appear. Flip the credit-score pill above the phone — eligibility updates in real time.' },
   { id: 2, name: 'Loan declined',                blurb: 'FD section → GC webview · secured cards',                     filter: { secured: true },       n: 4,
     tryThis: 'This is what a rejected user sees instead of dead-end messaging. The FD-backed card pitch lives inside the FD section they already trust. Switch pincode to 400088 vs 400001 to see the served-vs-unserved fork.' },
   { id: 3, name: 'Post-disbursal thank-you',     blurb: 'Confetti success screen · card CTA',                          filter: { premium: true },       n: 2,
