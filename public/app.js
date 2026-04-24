@@ -411,6 +411,7 @@ function activateTab(tab) {
 function renderPlacementsTab() {
   const extra = document.getElementById('tabExtra');
   extra.innerHTML = `
+    <div id="placementTryThis"></div>
     <div class="bg-white/5 border border-white/10 rounded-xl p-4">
       <p class="text-[10px] uppercase tracking-[0.18em] font-semibold text-slate-400 mb-3">Placements · 8 touchpoints</p>
       <div class="space-y-1">
@@ -425,7 +426,6 @@ function renderPlacementsTab() {
         `).join('')}
       </div>
     </div>
-    <div id="placementTryThis"></div>
   `;
   extra.querySelectorAll('.placement-item').forEach(el => {
     el.addEventListener('click', () => {
@@ -449,7 +449,7 @@ function renderPlacementTryThis(pid) {
   const p = PLACEMENTS.find(x => x.id === pid);
   if (!p) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = `
-    <div style="margin-top:14px;background:rgba(94,234,212,0.08);border:1px solid rgba(94,234,212,0.25);border-radius:12px;padding:14px 16px">
+    <div style="margin-bottom:14px;background:rgba(94,234,212,0.08);border:1px solid rgba(94,234,212,0.25);border-radius:12px;padding:14px 16px">
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
         <span style="font-size:10px;font-weight:800;letter-spacing:0.18em;color:#5eead4;text-transform:uppercase">Try this →</span>
         <span style="font-size:11px;color:#94a3b8">Placement ${p.id} · ${escapeHtml(p.name)}</span>
