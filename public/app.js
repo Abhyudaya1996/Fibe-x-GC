@@ -33,21 +33,54 @@ const state = {
 
 const PLACEMENTS = [
   { id: 1, name: 'Homepage widget',              blurb: 'Trending tile → webview funnel (categories + spend slider)',  filter: { match: true },         n: 3,
-    tryThis: 'Inside the phone, scroll down past the teal "10 YEARS" hero, past the Instant Cash / Credit Score snap cards, past "Hand-picked for you" and the "Fibe HUB" pill. Stop at the "Trending" row. Swipe that row sideways (it scrolls horizontally) — skip past the Vouchers and Fixed Deposits tiles until you hit the pulsing teal tile labelled "✨ POWERED BY GREAT.CARDS · Find your best credit card". Tap it to launch the funnel, pick 2–3 categories, set ₹ spend per category on the sliders, and watch three matched cards appear. Flip the credit-score pill above the phone — eligibility updates in real time.' },
+    tryThis: [
+      'Scroll the phone past the teal "10 YEARS" hero and the Instant Cash / Credit Score snap cards.',
+      'Keep going past "Hand-picked for you" and the "Fibe HUB" pill until you hit the "Trending" row.',
+      'Swipe Trending sideways — past Vouchers and Fixed Deposits — to the pulsing teal "✨ POWERED BY GREAT.CARDS" tile.',
+      'Tap it, pick 2–3 categories, set ₹ spend per category, and 3 matched cards appear.',
+      'Flip the credit-score pill above the phone — eligibility updates live.'
+    ] },
   { id: 2, name: 'Loan declined',                blurb: 'FD section → GC webview · secured cards',                     filter: { secured: true },       n: 4,
-    tryThis: 'This is what a rejected user sees instead of dead-end messaging. The FD-backed card pitch lives inside the FD section they already trust. Switch pincode to 400088 vs 400001 to see the served-vs-unserved fork.' },
+    tryThis: [
+      'Replaces dead-end rejection messaging with an FD-backed card pitch.',
+      'Lives inside the FD section the user already trusts.',
+      'Switch pincode 400088 ↔ 400001 to see served-vs-unserved fork.'
+    ] },
   { id: 3, name: 'Post-disbursal thank-you',     blurb: 'Confetti success screen · card CTA',                          filter: { premium: true },       n: 2,
-    tryThis: 'Fires ~2 hrs after disbursal — psychological peak for cross-sell. Notice the card CTA sits BELOW the celebration, not inside it. Emotion first, card second. This is priority #1 in the system.' },
+    tryThis: [
+      'Fires ~2 hrs after disbursal — psychological peak for cross-sell.',
+      'Card CTA sits BELOW the celebration, not inside it. Emotion first, card second.',
+      'Priority #1 placement in the system.'
+    ] },
   { id: 4, name: 'EMI tracker / repayment',      blurb: 'EMI schedule page · "rewards pay your EMI" card',             filter: { ltf: true },           n: 2,
-    tryThis: 'User opens this to check their loan. The card tile is placed where the "rewards = 1 free EMI" math clicks fastest. Bump income higher to see the reward-offset math scale with spend capacity.' },
+    tryThis: [
+      'User lands here to check their loan — high intent moment.',
+      'Card tile frames rewards as "1 free EMI" math.',
+      'Bump income higher — reward-offset scales with spend capacity.'
+    ] },
   { id: 5, name: 'Sanctioned email',             blurb: 'Email body, deep-links back to app',                          filter: { premium: true },       n: 2, email: true,
-    tryThis: 'Email preview — not a phone screen. Ships at approval + 24 hrs. Deep-links back to the app with card reco pre-loaded. Change credit score to see the card pick rotate from LTF → premium.' },
+    tryThis: [
+      'Email preview — not a phone screen.',
+      'Ships at approval + 24 hrs, deep-links back to app with card pre-loaded.',
+      'Change credit score — pick rotates LTF → premium.'
+    ] },
   { id: 6, name: 'Trending row tile',            blurb: 'Featured LTF card of the week in Trending carousel',          filter: { ltf: true, popular: true }, n: 1,
-    tryThis: 'One featured card, high-impact placement. Change the credit score pill to see the featured card rotate — low scores surface LTF, high scores surface premium.' },
+    tryThis: [
+      'One featured card, high-impact slot inside Trending.',
+      'Flip the credit-score pill — featured card rotates LTF ↔ premium.'
+    ] },
   { id: 7, name: 'Tailor-made offers carousel',  blurb: 'Credit-score page · "Super offer" 2-col grid slot',           filter: { match: true },         n: 3, carousel: true,
-    tryThis: 'Users on this page already care about their score. The 3-card grid reshuffles on every profile change. Try toggling Salaried ↔ Self-employed — different cards surface.' },
+    tryThis: [
+      'Users on this page already care about their score — high-intent surface.',
+      'The 3-card grid reshuffles on every profile change.',
+      'Toggle Salaried ↔ Self-employed — different cards surface.'
+    ] },
   { id: 8, name: 'Play & Win — LTF unlock',      blurb: 'Slash-the-Fruits reward surface · 3-win unlock',              filter: { ltf: true },           n: 3, game: true,
-    tryThis: 'Gamified LTF unlock. 3 wins in Slash-the-Fruits = free card. The unlocked card matches user eligibility — change score to see the reward change.' },
+    tryThis: [
+      'Gamified LTF unlock — 3 wins in Slash-the-Fruits = free card.',
+      'Unlocked card matches user eligibility.',
+      'Change score — reward card changes with it.'
+    ] },
 ];
 
 // Per-category spend defaults (₹/mo) + reward rates used for projected earnings.
@@ -454,7 +487,9 @@ function renderPlacementTryThis(pid) {
         <span style="font-size:10px;font-weight:800;letter-spacing:0.18em;color:#5eead4;text-transform:uppercase">Try this →</span>
         <span style="font-size:11px;color:#94a3b8">Placement ${p.id} · ${escapeHtml(p.name)}</span>
       </div>
-      <p style="font-size:12.5px;color:#e2e8f0;line-height:1.55">${escapeHtml(p.tryThis || '')}</p>
+      ${Array.isArray(p.tryThis)
+        ? `<ul style="margin:0;padding-left:18px;font-size:12.5px;color:#e2e8f0;line-height:1.55">${p.tryThis.map(b => `<li style="margin-bottom:4px">${escapeHtml(b)}</li>`).join('')}</ul>`
+        : `<p style="font-size:12.5px;color:#e2e8f0;line-height:1.55">${escapeHtml(p.tryThis || '')}</p>`}
     </div>
   `;
 }
