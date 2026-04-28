@@ -4,7 +4,7 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Fibe × Great.Cards</title>
-<link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+<link rel="icon" type="image/x-icon" href="/favicon.ico"/>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms"></script>
 <script>
@@ -35,10 +35,10 @@ tailwind.config = {
 <!-- ── Top nav ───────────────────────────────────────────── -->
 <header id="topnav" class="fixed top-0 left-0 right-0 z-40 bg-white/95 backdrop-blur border-b border-slate-100">
   <div class="max-w-6xl mx-auto flex items-center justify-between px-6 h-14">
-    <a href="/" data-link class="flex items-center gap-2">
-      <span class="text-lg font-extrabold text-teal tracking-tight">fibe</span>
-      <span class="text-mute text-xs">×</span>
-      <span class="text-sm font-bold text-ink">Great.Cards</span>
+    <a href="/" data-link class="flex items-center gap-3">
+      <img src="/assets/brand/fibe-logo.jpg" alt="Fibe" style="height:22px;width:auto"/>
+      <span class="text-mute text-sm font-light">×</span>
+      <img src="/assets/brand/gc-logo.svg" alt="Great.Cards" style="height:18px;width:auto;filter:invert(20%) sepia(25%) saturate(1500%) hue-rotate(150deg) brightness(50%)"/>
     </a>
     <nav class="flex items-center gap-6 text-[13px] font-semibold text-slate-600">
       <a href="/" data-link data-nav="home" class="hover:text-teal transition-colors">Homepage</a>
@@ -57,6 +57,106 @@ tailwind.config = {
 
   <!-- ═════════════  PAGE: / HOMEPAGE  ═════════════ -->
   <section id="page-home" class="page hidden bg-panel text-slate-200 min-h-[calc(100vh-56px)]">
+
+    <!-- HERO POSTER -->
+    <div style="max-width:1100px;margin:0 auto;padding:48px 32px 28px 32px">
+      <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:48px;align-items:center">
+        <div>
+          <div style="display:flex;align-items:center;gap:12px;margin-bottom:24px">
+            <img src="/assets/brand/fibe-logo.jpg" alt="Fibe" style="height:28px;background:#fff;padding:4px 8px;border-radius:6px"/>
+            <span style="color:#475569;font-size:18px;font-weight:300">×</span>
+            <img src="/assets/brand/gc-logo.svg" alt="Great.Cards" style="height:22px;filter:brightness(1.5)"/>
+          </div>
+          <div style="font-size:13px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#5eead4;margin-bottom:14px">Conservative additional revenue</div>
+          <h1 style="font-size:84px;font-weight:800;color:#f1f5f9;line-height:0.95;letter-spacing:-0.03em;margin-bottom:14px">
+            ₹4.53 Cr<span style="color:#5eead4">.</span>
+          </h1>
+          <p style="font-size:20px;color:#cbd5e1;line-height:1.4;font-weight:500;margin-bottom:8px">From traffic Fibe already owns.</p>
+          <p style="font-size:14px;color:#64748b;line-height:1.6">No new users. No new product. No engineering rebuild.</p>
+        </div>
+        <div style="display:flex;justify-content:center;align-items:center">
+          <img src="/assets/brand/hero-funnel.png" alt="Loan to credit cards" style="width:100%;max-width:480px;height:auto;border-radius:18px"/>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;margin-top:36px">
+        <a href="/demo" data-link style="display:inline-flex;align-items:center;gap:8px;background:#006767;color:#fff;font-size:14px;font-weight:700;padding:14px 24px;border-radius:10px;text-decoration:none">See it working →</a>
+        <a href="/revenue" data-link style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);color:#e2e8f0;font-size:14px;font-weight:700;padding:14px 24px;border-radius:10px;text-decoration:none">See the numbers →</a>
+      </div>
+    </div>
+
+    <!-- 01 OPPORTUNITY -->
+    <div style="max-width:1100px;margin:0 auto;padding:64px 32px 32px 32px;border-top:1px solid rgba(255,255,255,0.06)">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+        <div>
+          <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#64748b;margin-bottom:14px">01 · The Opportunity</p>
+          <h2 style="font-size:32px;font-weight:800;color:#f1f5f9;line-height:1.2;margin-bottom:16px">3 lakh borrowers a month. Every one already pre-qualified.</h2>
+          <p style="font-size:15px;color:#94a3b8;line-height:1.7">Income-verified. KYC-complete. Credit-scored. Banks want to issue them cards. Today that revenue goes to Paisabazaar.</p>
+        </div>
+        <div>
+          <img src="/assets/brand/data-pipeline.png" alt="Data pipeline" style="width:100%;height:auto;border-radius:16px"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 02 WHY GC -->
+    <div style="max-width:1100px;margin:0 auto;padding:32px 32px 32px 32px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center">
+        <div style="order:2">
+          <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#64748b;margin-bottom:14px">02 · Why Great.Cards</p>
+          <h2 style="font-size:32px;font-weight:800;color:#f1f5f9;line-height:1.2;margin-bottom:16px">Building it yourself takes years. We're already live.</h2>
+          <p style="font-size:15px;color:#94a3b8;line-height:1.7;margin-bottom:20px">Direct bank tie-ups: 18 months each. In-house compliance: a permanent team. We've done both. You embed one webview.</p>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px">
+              <div style="font-size:18px;font-weight:800;color:#5eead4;line-height:1">100+</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px">cards live</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px">
+              <div style="font-size:18px;font-weight:800;color:#5eead4;line-height:1">Zero</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px">PII shared</div>
+            </div>
+            <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:10px;padding:12px">
+              <div style="font-size:18px;font-weight:800;color:#5eead4;line-height:1">1</div>
+              <div style="font-size:11px;color:#94a3b8;margin-top:4px">sprint to ship</div>
+            </div>
+          </div>
+        </div>
+        <div style="order:1">
+          <img src="/assets/brand/phone-card.png" alt="In-app card" style="width:100%;max-width:380px;height:auto;border-radius:16px;display:block;margin:0 auto"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- 03 WHAT FIBE BRINGS -->
+    <div style="max-width:1100px;margin:0 auto;padding:32px 32px 64px 32px">
+      <div style="background:url(/assets/brand/grid-bg.png) center/cover no-repeat,linear-gradient(135deg,rgba(0,103,103,0.18),rgba(15,23,42,0.65));border:1px solid rgba(94,234,212,0.2);border-radius:20px;padding:40px 36px">
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#5eead4;margin-bottom:14px">03 · What Fibe Brings</p>
+        <h2 style="font-size:32px;font-weight:800;color:#f1f5f9;line-height:1.2;margin-bottom:14px">Users. Trust. Pre-qualification.</h2>
+        <p style="font-size:15px;color:#cbd5e1;line-height:1.7;margin-bottom:28px;max-width:640px">That is why conversion on Fibe placements runs structurally higher than cold-start aggregator flows. The split reflects exactly that.</p>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.1);border-radius:12px;overflow:hidden">
+          <div style="background:rgba(11,18,32,0.85);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">8</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:6px">placements</div>
+          </div>
+          <div style="background:rgba(11,18,32,0.85);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">12</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:6px">cohorts</div>
+          </div>
+          <div style="background:rgba(11,18,32,0.85);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">100+</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:6px">cards</div>
+          </div>
+          <div style="background:rgba(11,18,32,0.85);padding:20px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">1 sprint</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:6px">to ship</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- LEGACY HOME (suppressed) -->
+  <div style="display:none">
     <div class="max-w-2xl mx-auto px-6 py-20 space-y-20">
 
       <!-- ── Hero ── -->
@@ -170,7 +270,7 @@ tailwind.config = {
       </div>
 
     </div>
-  </section>
+  </div>
 
   <!-- ═════════════  PAGE: /demo  ═════════════ -->
   <section id="page-demo" class="page hidden bg-panel text-slate-200 min-h-[calc(100vh-56px)]">

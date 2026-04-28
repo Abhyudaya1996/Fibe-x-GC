@@ -36,8 +36,8 @@ const PLACEMENTS = [
     tryThis: [
       'Scroll the phone past the teal "10 YEARS" hero and the Instant Cash / Credit Score snap cards.',
       'Keep going past "Hand-picked for you" and the "Fibe HUB" pill until you hit the "Trending" row.',
-      'Swipe Trending sideways — past Vouchers and Fixed Deposits — to the pulsing teal "✨ POWERED BY GREAT.CARDS" tile.',
-      'Tap it, pick 2–3 categories, set ₹ spend per category, and 3 matched cards appear.',
+      'The pulsing teal "✨ POWERED BY GREAT.CARDS" tile is the first card in Trending.',
+      'Tap it, pick 2-3 categories, set ₹ spend per category, and 3 matched cards appear.',
       'Flip the credit-score pill above the phone — eligibility updates live.'
     ] },
   { id: 2, name: 'Loan declined',                blurb: 'FD section → GC webview · secured cards',                     filter: { secured: true },       n: 4,
@@ -759,6 +759,12 @@ function renderFibeHomepage(opts = {}) {
               <div style="position:absolute;bottom:10px;right:10px;display:inline-flex;align-items:center;gap:4px;background:#fbbf24;color:#7c2d12;padding:4px 9px;border-radius:12px;font-size:10px;font-weight:800">Apply <span class="material-symbols-outlined" style="font-size:12px">arrow_forward</span></div>
             </div>
             ` : ''}
+            <div id="p1GCTile" style="flex:0 0 152px;height:178px;border-radius:14px;background:linear-gradient(160deg,#0e7490 0%,#006767 60%,#0a4d4d 100%);padding:12px;color:#fff;cursor:pointer;position:relative;overflow:hidden;${highlightGC ? 'box-shadow:0 0 0 2px rgba(94,234,212,0.7);animation:p1Pulse 2s ease-in-out infinite;' : ''}">
+              <div style="font-size:10px;font-weight:700;color:#fbbf24;margin-bottom:6px;letter-spacing:0.04em">✨ POWERED BY GREAT.CARDS</div>
+              <div style="font-size:14px;font-weight:900;line-height:1.15;margin-bottom:4px">Find your best<br/>credit card</div>
+              <div style="font-size:10.5px;opacity:0.85;line-height:1.35">Pick spends.<br/>We match the card<br/>that saves you most.</div>
+              <div style="position:absolute;bottom:10px;right:10px;width:26px;height:26px;border-radius:50%;background:#fbbf24;display:flex;align-items:center;justify-content:center;color:#0a4d4d"><span class="material-symbols-outlined" style="font-size:16px;font-weight:800">arrow_forward</span></div>
+            </div>
             <div style="flex:0 0 152px;height:178px;border-radius:14px;background:linear-gradient(165deg,#0f4c81 0%,#1e3a8a 65%,#1d4ed8 100%);padding:12px;color:#fff;position:relative;overflow:hidden">
               <div style="position:absolute;inset:0;background-image:repeating-linear-gradient(115deg,transparent 0 11px,rgba(255,255,255,0.08) 11px 12px);pointer-events:none"></div>
               <div style="position:relative;font-size:11px;font-weight:500;opacity:0.9">Shop Smart with</div>
@@ -781,12 +787,6 @@ function renderFibeHomepage(opts = {}) {
                 <div style="width:32px;height:32px;border-radius:6px;background:#64748b;display:flex;align-items:center;justify-content:center;font-size:16px">🔒</div>
                 <div style="width:20px;height:22px;border-radius:3px;background:#fbbf24;position:relative"><div style="position:absolute;inset:2px;border-radius:2px;background:linear-gradient(135deg,#b45309,#fbbf24)"></div></div>
               </div>
-            </div>
-            <div id="p1GCTile" style="flex:0 0 152px;height:178px;border-radius:14px;background:linear-gradient(160deg,#0e7490 0%,#006767 60%,#0a4d4d 100%);padding:12px;color:#fff;cursor:pointer;position:relative;overflow:hidden;${highlightGC ? 'box-shadow:0 0 0 2px rgba(94,234,212,0.7);animation:p1Pulse 2s ease-in-out infinite;' : ''}">
-              <div style="font-size:10px;font-weight:700;color:#fbbf24;margin-bottom:6px;letter-spacing:0.04em">✨ POWERED BY GREAT.CARDS</div>
-              <div style="font-size:14px;font-weight:900;line-height:1.15;margin-bottom:4px">Find your best<br/>credit card</div>
-              <div style="font-size:10.5px;opacity:0.85;line-height:1.35">Pick spends.<br/>We match the card<br/>that saves you most.</div>
-              <div style="position:absolute;bottom:10px;right:10px;width:26px;height:26px;border-radius:50%;background:#fbbf24;display:flex;align-items:center;justify-content:center;color:#0a4d4d"><span class="material-symbols-outlined" style="font-size:16px;font-weight:800">arrow_forward</span></div>
             </div>
             <div style="flex:0 0 152px;height:178px;border-radius:14px;background:linear-gradient(160deg,#0f766e,#134e4a);padding:12px;color:#fff;position:relative;overflow:hidden">
               <div style="font-size:13px;font-weight:800">Instant Health</div>
