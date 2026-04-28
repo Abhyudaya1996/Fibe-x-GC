@@ -56,52 +56,116 @@ tailwind.config = {
 <main id="app" class="pt-14">
 
   <!-- ═════════════  PAGE: / HOMEPAGE  ═════════════ -->
-  <section id="page-home" class="page hidden">
-    <div class="max-w-3xl mx-auto px-6 py-16 space-y-14">
+  <section id="page-home" class="page hidden bg-panel text-slate-200 min-h-[calc(100vh-56px)]">
+    <div class="max-w-2xl mx-auto px-6 py-20 space-y-20">
 
-      <!-- Block 1 · Problem -->
+      <!-- ── Hero ── -->
       <div>
-        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-mute mb-3">The problem</p>
-        <p class="text-[28px] md:text-[32px] leading-[1.25] font-semibold text-ink">
-          Fibe has <span class="text-teal">9 lakh active borrowers</span> and
-          <span class="text-teal">350K monthly disbursals</span>. Every one of them who wants a credit card leaves Fibe today to apply elsewhere.
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#5eead4;margin-bottom:20px">Fibe × Great.Cards · Partnership Brief</p>
+        <h1 style="font-size:40px;font-weight:800;color:#f1f5f9;line-height:1.18;margin-bottom:18px">
+          ₹4.53 Cr in additional revenue.<br>From traffic you already own.
+        </h1>
+        <p style="font-size:18px;color:#94a3b8;line-height:1.65">
+          Conservative estimate. No new users to acquire. No new product to build.
+          Just credit cards — placed at the exact moments in the Fibe journey where users already need them.
         </p>
       </div>
 
-      <!-- Block 2 · Fix -->
+      <!-- ── Why Bother ── -->
       <div>
-        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-mute mb-3">The fix</p>
-        <p class="text-[22px] md:text-[24px] leading-[1.4] text-ink/90">
-          We put <span class="font-semibold text-ink">100+ cards</span> inside Fibe without touching the loan book, the approval rates, or a single line of Fibe's backend code.
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#64748b;margin-bottom:20px">01 · Why Bother?</p>
+        <p style="font-size:22px;font-weight:700;color:#e2e8f0;line-height:1.35;margin-bottom:16px">
+          Fibe disburses 3 lakh loans every month. Every borrower is income-verified, KYC-complete, and credit-scored.
         </p>
-      </div>
+        <p style="font-size:16px;color:#94a3b8;line-height:1.7;margin-bottom:14px">
+          That makes them exactly the customer banks want to give a credit card to. After their loan, the natural next step in their financial life is a credit card — for rewards, for a credit buffer, for EMI flexibility on the next purchase.
+        </p>
+        <p style="font-size:16px;color:#94a3b8;line-height:1.7;">
+          Right now that conversation happens somewhere else. On Paisabazaar, BankBazaar, or a bank's own website — with someone else capturing the commission. Fibe does the hard work of acquiring and qualifying the user, then hands them off for free.
+        </p>
 
-      <!-- Block 3 · Revenue headline (editable) -->
-      <div class="border-t border-slate-200 pt-10">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-mute mb-5">The revenue, inline</p>
-        <div id="heroFunnel" class="text-[20px] md:text-[22px] leading-[1.9] font-medium text-ink/90 tracking-tight">
-          <!-- rendered by app.js -->
+        <!-- Revenue callout -->
+        <div style="margin-top:28px;background:rgba(0,103,103,0.15);border:1px solid rgba(0,103,103,0.35);border-radius:16px;padding:24px 28px;display:flex;justify-content:space-between;align-items:center;gap:20px">
+          <div>
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.16em;text-transform:uppercase;color:#5eead4;margin-bottom:8px">Conservative additional revenue for Fibe</div>
+            <div style="font-size:42px;font-weight:800;color:#f1f5f9;line-height:1">₹4.53 Cr <span style="font-size:18px;font-weight:500;color:#94a3b8">/ year</span></div>
+            <div style="font-size:13px;color:#64748b;margin-top:8px">2,700 cards/month · ₹2,000 commission · 70% Fibe share</div>
+          </div>
+          <a href="/revenue" data-link style="flex-shrink:0;background:rgba(0,103,103,0.3);border:1px solid rgba(0,103,103,0.5);border-radius:10px;padding:10px 16px;font-size:12px;font-weight:700;color:#5eead4;text-decoration:none;white-space:nowrap">Adjust the model →</a>
         </div>
-        <p class="mt-4 text-[13px] text-mute">
-          Conservative. <a href="/revenue" data-link class="text-teal font-semibold underline-offset-4 hover:underline">See the full model →</a>
+      </div>
+
+      <!-- ── Why Us ── -->
+      <div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#64748b;margin-bottom:20px">02 · Why Great.Cards?</p>
+        <p style="font-size:22px;font-weight:700;color:#e2e8f0;line-height:1.35;margin-bottom:16px">
+          The alternative is building it yourself. That's a longer road than it looks.
         </p>
+        <p style="font-size:16px;color:#94a3b8;line-height:1.7;margin-bottom:14px">
+          Direct bank relationships take 12–18 months of legal, commercial, and compliance negotiation — per bank. Paisabazaar spent years building those. Building in-house means owning the card catalog, eligibility logic, bank APIs, and a compliance layer that needs permanent maintenance. That is a team and a budget that never goes away.
+        </p>
+        <p style="font-size:16px;color:#94a3b8;line-height:1.7;margin-bottom:28px">
+          Great.Cards gives Fibe 100+ cards, a live eligibility engine, and an AI calling team through a single API. One sprint to embed. We handle the banks, the compliance, the calling, and the reporting.
+        </p>
+
+        <!-- 3-col differentiators -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px">
+            <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:8px">100+ cards</div>
+            <div style="font-size:12px;color:#64748b;line-height:1.6">Live catalog across all major banks — HDFC, Axis, ICICI, SBI, Amex and more.</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px">
+            <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:8px">Zero PII</div>
+            <div style="font-size:12px;color:#64748b;line-height:1.6">We receive a bucketed credit score and a rounded income. Nothing else. No compliance exposure for Fibe.</div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px">
+            <div style="font-size:13px;font-weight:700;color:#e2e8f0;margin-bottom:8px">One sprint</div>
+            <div style="font-size:12px;color:#64748b;line-height:1.6">Webview embed. Fibe engineering touches ~200 lines of code. Every new placement after that is a URL change.</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Block 4 · Why us -->
-      <div class="border-t border-slate-200 pt-10">
-        <p class="text-[11px] font-semibold uppercase tracking-[0.18em] text-mute mb-5">Why Great.Cards</p>
-        <ul class="space-y-3 text-[17px] text-ink/90">
-          <li class="flex items-start gap-3"><span class="text-teal font-bold mt-0.5">·</span>100+ cards vs the 1 IDFC First slot you have today</li>
-          <li class="flex items-start gap-3"><span class="text-teal font-bold mt-0.5">·</span>Eligibility engine — recommendations pre-filtered, no user ever sees a rejection</li>
-          <li class="flex items-start gap-3"><span class="text-teal font-bold mt-0.5">·</span>AI calling team — we call the leads you share, you see the commission</li>
-        </ul>
+      <!-- ── Why Partner ── -->
+      <div>
+        <p style="font-size:11px;font-weight:700;letter-spacing:0.2em;text-transform:uppercase;color:#64748b;margin-bottom:20px">03 · What Fibe Brings</p>
+        <p style="font-size:22px;font-weight:700;color:#e2e8f0;line-height:1.35;margin-bottom:16px">
+          The hard part is already done.
+        </p>
+        <p style="font-size:16px;color:#94a3b8;line-height:1.7;margin-bottom:14px">
+          User acquisition, trust, KYC, income verification, credit scoring — Fibe has done all of it. By the time a user sees a Great.Cards recommendation, they are already pre-qualified. That is why conversion benchmarks on Fibe placements are structurally higher than cold-start aggregator flows.
+        </p>
+        <p style="font-size:16px;color:#94a3b8;line-height:1.7;">
+          Fibe brings the users and the trust. Great.Cards brings the product and the infrastructure. The revenue split reflects exactly that.
+        </p>
+
+        <!-- Integration facts strip -->
+        <div style="margin-top:28px;display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:rgba(255,255,255,0.08);border-radius:14px;overflow:hidden">
+          <div style="background:#0b1220;padding:20px 16px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">8</div>
+            <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.4">placement touchpoints</div>
+          </div>
+          <div style="background:#0b1220;padding:20px 16px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">12</div>
+            <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.4">notification cohorts</div>
+          </div>
+          <div style="background:#0b1220;padding:20px 16px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">100+</div>
+            <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.4">credit cards</div>
+          </div>
+          <div style="background:#0b1220;padding:20px 16px;text-align:center">
+            <div style="font-size:28px;font-weight:800;color:#5eead4;line-height:1">1 sprint</div>
+            <div style="font-size:11px;color:#64748b;margin-top:6px;line-height:1.4">to go live</div>
+          </div>
+        </div>
       </div>
 
-      <!-- CTA -->
-      <div class="pt-6">
-        <a href="/demo" data-link class="inline-flex items-center gap-2 px-6 py-3 bg-teal text-white font-semibold rounded-full hover:bg-teal-2 transition-colors">
-          See the integration
-          <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+      <!-- ── CTAs ── -->
+      <div style="display:flex;gap:12px;padding-top:4px;flex-wrap:wrap">
+        <a href="/demo" data-link style="display:inline-flex;align-items:center;gap:8px;background:#006767;color:#fff;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;text-decoration:none">
+          See it working →
+        </a>
+        <a href="/revenue" data-link style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:#e2e8f0;font-size:14px;font-weight:700;padding:13px 22px;border-radius:10px;text-decoration:none">
+          See the numbers →
         </a>
       </div>
 

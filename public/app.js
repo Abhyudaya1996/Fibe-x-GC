@@ -322,39 +322,7 @@ window.addEventListener('popstate', route);
 // ═════════════════════════════════════════════════════════════════════════════
 
 function mountHome() {
-  renderHeroFunnel();
-}
-
-function renderHeroFunnel() {
-  const f   = state.funnel;
-  const el  = document.getElementById('heroFunnel');
-  if (!el) return;
-
-  el.innerHTML = `
-    <input class="inp" type="number" data-key="disbursals" value="${f.disbursals}" min="10000" max="2000000" step="10000"/>
-    disbursals/month ×
-    <input class="inp" type="number" data-key="seeRate" value="${f.seeRate}" min="0.1" max="100" step="0.1"/>%
-    see card ×
-    <input class="inp" type="number" data-key="clickRate" value="${f.clickRate}" min="0.1" max="100" step="0.5"/>%
-    click ×
-    <input class="inp" type="number" data-key="approvRate" value="${f.approvRate}" min="0.1" max="100" step="0.5"/>%
-    approved × ₹<input class="inp" type="number" data-key="commission" value="${f.commission}" min="100" max="10000" step="100"/>
-    <span class="eq">= <span id="heroOut">${computeHero(f)}</span></span>
-  `;
-
-  el.querySelectorAll('.inp').forEach(inp => {
-    inp.addEventListener('input', () => {
-      const k = inp.dataset.key;
-      const v = parseFloat(inp.value) || 0;
-      state.funnel[k] = v;
-      document.getElementById('heroOut').textContent = computeHero(state.funnel);
-    });
-  });
-}
-
-function computeHero(f) {
-  const monthly = f.disbursals * (f.seeRate/100) * (f.clickRate/100) * (f.approvRate/100) * f.commission;
-  return inrCr(monthly) + '/month';
+  // Homepage is static HTML — no JS rendering needed
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
