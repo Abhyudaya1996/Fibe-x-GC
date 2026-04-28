@@ -2526,179 +2526,186 @@ function renderHookSurface_Referral(phone, h) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 const REV_SCENARIOS = {
-  conservative: { mau: 900000, seePct: 35, clickPct: 3, applyPct: 60, approvalPct: 50, commission: 2000,
-                  gcSplit: 28, teamCost: 1500000, infraCost: 200000, callerCost: 150, opsCost: 150, hookCost: 400 },
-  realistic:    { mau: 900000, seePct: 50, clickPct: 4, applyPct: 70, approvalPct: 55, commission: 2000,
-                  gcSplit: 30, teamCost: 2500000, infraCost: 300000, callerCost: 150, opsCost: 150, hookCost: 400 },
-  aggressive:   { mau: 900000, seePct: 65, clickPct: 5, applyPct: 75, approvalPct: 60, commission: 2200,
-                  gcSplit: 32, teamCost: 3500000, infraCost: 400000, callerCost: 150, opsCost: 150, hookCost: 500 },
+  conservative: { mau: 900000, ctrPct: 3,  cardOutPct: 10, commission: 2000, fibePct: 70, fixedCost: 400000 },
+  realistic:    { mau: 900000, ctrPct: 5,  cardOutPct: 15, commission: 2000, fibePct: 70, fixedCost: 400000 },
+  aggressive:   { mau: 900000, ctrPct: 8,  cardOutPct: 20, commission: 2200, fibePct: 70, fixedCost: 400000 },
 };
+
+const PLACEMENT_CTR_BENCH = [
+  { name: 'Post-disbursal thank-you', ctr: '8–15%',    note: 'Emotional peak — highest intent' },
+  { name: 'Loan rejection',           ctr: '5–10%',    note: 'Only positive option on screen' },
+  { name: 'Play & Win',               ctr: '5–12%',    note: 'Gamified, reward-motivated' },
+  { name: 'Credit score page',        ctr: '2–4%',     note: 'Credit-aware, medium intent' },
+  { name: 'Sanctioned email',         ctr: '2–5%',     note: 'Transactional email benchmark' },
+  { name: 'Homepage / Trending',      ctr: '0.5–1.5%', note: 'Passive browse, lowest intent' },
+];
 
 let revState = { ...REV_SCENARIOS.conservative };
 
-function mountRevenue() {
-  renderRevFunnel();
-  renderRevSplit();
-  renderRevUnit();
-  bindRevScenarios();
+const REV_SLIDER_MAP = [
+  { key: 'mau',        sliderId: 'revMauSlider',     labelId: 'revMauLabel',     fmt: v => fmt(v) },
+  { key: 'ctrPct',     sliderId: 'revCtrSlider',     labelId: 'revCtrLabel',     fmt: v => v + '%' },
+  { key: 'cardOutPct', sliderId: 'revCardOutSlider', labelId: 'revCardOutLabel', fmt: v => v + '%' },
+  { key: 'commission', sliderId: 'revCommSlider',    labelId: 'revCommLabel',    fmt: v => '₹' + fmt(v) },
+  { key: 'fixedCost',  sliderId: 'revFixedSlider',   labelId: 'revFixedLabel',   fmt: v => '₹' + fmt(v) },
+];
+
+function syncRevSliders() {
+  REV_SLIDER_MAP.forEach(({ key, sliderId, labelId, fmt: f }) => {
+    const el = document.getElementById(sliderId);
+    const lb = document.getElementById(labelId);
+    if (el) el.value = revState[key];
+    if (lb) lb.textContent = f(revState[key]);
+  });
+  // sync split pills
+  document.querySelectorAll('#revSplitPills .pill').forEach(b => {
+    b.classList.toggle('active', parseInt(b.dataset.fibe) === revState.fibePct);
+  });
+  // sync scenario pills
+  document.querySelectorAll('.scn').forEach(b => {
+    const sc = REV_SCENARIOS[b.dataset.scenario];
+    b.classList.toggle('active', sc &&
+      sc.mau === revState.mau && sc.ctrPct === revState.ctrPct &&
+      sc.cardOutPct === revState.cardOutPct && sc.commission === revState.commission);
+  });
 }
 
-function bindRevScenarios() {
-  document.querySelectorAll('.scn').forEach(btn => {
-    btn.onclick = () => {
-      revState = { ...REV_SCENARIOS[btn.dataset.scenario] };
-      renderRevFunnel();
-      renderRevSplit();
-      renderRevUnit();
+function mountRevenue() {
+  // sliders
+  REV_SLIDER_MAP.forEach(({ key, sliderId, labelId, fmt: f }) => {
+    const el = document.getElementById(sliderId);
+    const lb = document.getElementById(labelId);
+    if (!el) return;
+    el.oninput = () => {
+      revState[key] = parseFloat(el.value) || 0;
+      if (lb) lb.textContent = f(revState[key]);
+      renderRevOutput();
     };
   });
-}
-
-function revInp(key, val, suffix = '', width = '4ch') {
-  return `<input class="inp" type="number" data-rev="${key}" value="${val}" style="min-width:${width}"/>${suffix}`;
-}
-
-function renderRevFunnel() {
-  const s = revState;
-  const users   = Math.round(s.mau * s.seePct / 100);
-  const clicks  = Math.round(users * s.clickPct / 100);
-  const applies = Math.round(clicks * s.applyPct / 100);
-  const cards   = Math.round(applies * s.approvalPct / 100);
-  const monthly = cards * s.commission;
-  const annual  = monthly * 12;
-
-  document.getElementById('revFunnel').innerHTML = `
-    <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
-      <span class="text-ink">Fibe monthly active users</span>
-      <span>${revInp('mau', s.mau, '', '7ch')}</span>
-    </div>
-    <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
-      <span class="text-ink/80">× ${revInp('seePct', s.seePct, '%')} see a placement</span>
-      <span class="font-semibold text-teal">${fmt(users)} users</span>
-    </div>
-    <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
-      <span class="text-ink/80">× ${revInp('clickPct', s.clickPct, '%')} click through</span>
-      <span class="font-semibold text-teal">${fmt(clicks)} clicks</span>
-    </div>
-    <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
-      <span class="text-ink/80">× ${revInp('applyPct', s.applyPct, '%')} apply</span>
-      <span class="font-semibold text-teal">${fmt(applies)} applications</span>
-    </div>
-    <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
-      <span class="text-ink/80">× ${revInp('approvalPct', s.approvalPct, '%')} bank approval</span>
-      <span class="font-semibold text-teal">${fmt(cards)} cards/month</span>
-    </div>
-    <div class="flex items-baseline justify-between py-2 border-b border-slate-100">
-      <span class="text-ink/80">× ₹${revInp('commission', s.commission, '')} commission/card</span>
-      <span class="font-semibold text-teal">${inrCr(monthly)}/month</span>
-    </div>
-    <div class="flex items-baseline justify-between py-3 border-t-2 border-ink/20 mt-2">
-      <span class="text-ink font-semibold">= Annual gross</span>
-      <span class="font-bold text-teal text-[22px]">${inrCr(annual)}</span>
-    </div>
-    <p class="text-[12px] text-mute mt-2">${fmt(cards * 12)} cards/year total · benchmark: Paisabazaar peak ~80–100K/yr.</p>
-  `;
-
-  document.querySelectorAll('#revFunnel .inp').forEach(inp => {
-    inp.addEventListener('input', () => {
-      revState[inp.dataset.rev] = parseFloat(inp.value) || 0;
-      renderRevFunnel();
-      renderRevSplit();
-      renderRevUnit();
-    });
+  // scenario presets
+  document.querySelectorAll('.scn').forEach(btn => {
+    btn.onclick = () => {
+      const sc = REV_SCENARIOS[btn.dataset.scenario];
+      if (!sc) return;
+      Object.assign(revState, sc);
+      syncRevSliders();
+      renderRevOutput();
+    };
   });
-}
-
-function renderRevSplit() {
-  const s = revState;
-  const cards  = Math.round(s.mau * s.seePct/100 * s.clickPct/100 * s.applyPct/100 * s.approvalPct/100);
-  const annual = cards * 12 * s.commission;
-
-  const rows = [
-    { label: '70 / 30',   fibe: 70, gc: 30 },
-    { label: '60 / 40',   fibe: 60, gc: 40 },
-    { label: '50 / 50',   fibe: 50, gc: 50 },
-  ];
-
-  document.getElementById('revSplit').innerHTML = `
-    <div class="grid grid-cols-3 text-[11px] uppercase tracking-wider font-semibold text-mute border-b border-slate-200 py-2">
-      <div>Split (Fibe / GC)</div>
-      <div class="text-right">Fibe share</div>
-      <div class="text-right">GC share</div>
-    </div>
-    ${rows.map(r => `
-      <div class="grid grid-cols-3 py-3 border-b border-slate-100 text-[15px]">
-        <div class="text-ink font-semibold">${r.label}</div>
-        <div class="text-right text-ink/80">${inrCr(annual * r.fibe / 100)}</div>
-        <div class="text-right font-semibold text-teal">${inrCr(annual * r.gc / 100)}</div>
-      </div>
-    `).join('')}
-  `;
-}
-
-function renderRevUnit() {
-  const s = revState;
-  const cardsYr  = Math.round(s.mau * s.seePct/100 * s.clickPct/100 * s.applyPct/100 * s.approvalPct/100) * 12;
-  const annualGross = cardsYr * s.commission;
-  const gcRev  = annualGross * s.gcSplit / 100;
-
-  const fixedYr    = (s.teamCost + s.infraCost) * 12;
-  const variablePerCard = s.callerCost + s.opsCost + s.hookCost;
-  const variableYr = variablePerCard * cardsYr;
-  const totalCost  = fixedYr + variableYr;
-  const gcNet      = gcRev - totalCost;
-  const unitPositive = gcNet >= 0;
-
-  document.getElementById('revUnit').innerHTML = `
-    <div class="space-y-2 text-[15px]">
-      <div class="flex justify-between py-2 border-b border-slate-100">
-        <span class="text-ink/80">GC gross revenue (at ${revInp('gcSplit', s.gcSplit, '%')} blended share)</span>
-        <span class="font-semibold text-teal">${inrCr(gcRev)}/yr</span>
-      </div>
-      <div class="pt-2 pb-1 text-[11px] uppercase tracking-wider font-semibold text-mute">Fixed monthly costs</div>
-      <div class="flex justify-between py-1.5 border-b border-slate-100">
-        <span class="text-ink/80">Team (callers + PM + ops)</span>
-        <span>₹${revInp('teamCost', s.teamCost, '', '7ch')}/mo</span>
-      </div>
-      <div class="flex justify-between py-1.5 border-b border-slate-100">
-        <span class="text-ink/80">Infra + API</span>
-        <span>₹${revInp('infraCost', s.infraCost, '', '6ch')}/mo</span>
-      </div>
-      <div class="pt-2 pb-1 text-[11px] uppercase tracking-wider font-semibold text-mute">Variable per card</div>
-      <div class="flex justify-between py-1.5 border-b border-slate-100">
-        <span class="text-ink/80">Caller cost</span>
-        <span>₹${revInp('callerCost', s.callerCost, '')}/card</span>
-      </div>
-      <div class="flex justify-between py-1.5 border-b border-slate-100">
-        <span class="text-ink/80">Ops</span>
-        <span>₹${revInp('opsCost', s.opsCost, '')}/card</span>
-      </div>
-      <div class="flex justify-between py-1.5 border-b border-slate-100">
-        <span class="text-ink/80">Hook funding (blended)</span>
-        <span>₹${revInp('hookCost', s.hookCost, '')}/card</span>
-      </div>
-      <div class="flex justify-between py-2 border-b border-slate-100">
-        <span class="text-ink/80">GC total cost / year</span>
-        <span class="font-semibold">${inrCr(totalCost)}</span>
-      </div>
-      <div class="flex justify-between py-3 border-t-2 border-ink/20 mt-2">
-        <span class="text-ink font-semibold">GC net / year</span>
-        <span class="font-bold text-[20px] ${unitPositive ? 'text-teal' : 'text-red'}">${inrCr(gcNet)}</span>
-      </div>
-      <div class="rounded-lg px-4 py-3 mt-2 ${unitPositive ? 'bg-teal/10 text-teal' : 'bg-red/10 text-red'} text-[13px] font-semibold">
-        ${unitPositive
-          ? '✓ Unit positive at these inputs — GC makes money on every card.'
-          : '✗ Below unit. Fixed costs exceed GC share of revenue. Lever to pull: negotiate higher GC split, drop hook funding, or grow cards/month.'}
-      </div>
-    </div>
-  `;
-
-  document.querySelectorAll('#revUnit .inp').forEach(inp => {
-    inp.addEventListener('input', () => {
-      revState[inp.dataset.rev] = parseFloat(inp.value) || 0;
-      renderRevUnit();
-    });
+  // split pills
+  document.querySelectorAll('#revSplitPills .pill').forEach(btn => {
+    btn.onclick = () => {
+      revState.fibePct = parseInt(btn.dataset.fibe);
+      syncRevSliders();
+      renderRevOutput();
+    };
   });
+  syncRevSliders();
+  renderRevOutput();
+}
+
+function renderRevOutput() {
+  const s = revState;
+  const clicks   = Math.round(s.mau * s.ctrPct / 100);
+  const cards    = Math.round(clicks * s.cardOutPct / 100);
+  const monthly  = cards * s.commission;
+  const annual   = monthly * 12;
+  const fibeRev  = annual * s.fibePct / 100;
+  const gcRev    = annual * (100 - s.fibePct) / 100;
+  const fixedAnn = s.fixedCost * 12;
+  const gcNet    = gcRev - fixedAnn;
+  const positive = gcNet >= 0;
+  const gcMargin = gcRev > 0 ? Math.round((gcNet / gcRev) * 100) : 0;
+
+  const step = (label, val, sub) => `
+    <div style="text-align:center;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:16px;padding:20px 10px">
+      <div style="font-size:26px;font-weight:800;color:#5eead4;line-height:1">${val}</div>
+      <div style="font-size:11px;font-weight:600;color:#94a3b8;margin-top:6px;text-transform:uppercase;letter-spacing:0.1em">${label}</div>
+      ${sub ? `<div style="font-size:11px;color:#64748b;margin-top:4px">${sub}</div>` : ''}
+    </div>`;
+
+  const arrow = `<div style="text-align:center;color:#334155;font-size:20px;align-self:center">→</div>`;
+
+  document.getElementById('revOutput').innerHTML = `
+    <p style="font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#64748b;margin-bottom:16px">Revenue Funnel · adjust assumptions on the left</p>
+
+    <!-- Funnel steps -->
+    <div style="display:grid;grid-template-columns:1fr 28px 1fr 28px 1fr;gap:6px;margin-bottom:20px">
+      ${step('Fibe MAU', fmt(s.mau), 'monthly active users')}
+      ${arrow}
+      ${step('Clicks / month', fmt(clicks), s.ctrPct + '% CTR')}
+      ${arrow}
+      ${step('Cards / month', fmt(cards), s.cardOutPct + '% click → card')}
+    </div>
+
+    <!-- Gross revenue bar -->
+    <div style="background:linear-gradient(135deg,#006767,#008282);border-radius:14px;padding:20px 24px;display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.65)">Gross Commission</div>
+        <div style="font-size:36px;font-weight:800;color:#fff;margin-top:4px;line-height:1">${inrCr(annual)}<span style="font-size:16px;font-weight:500;opacity:0.7"> / year</span></div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-size:14px;color:rgba(255,255,255,0.8)">${inrCr(monthly)} / month</div>
+        <div style="font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px">${fmt(cards * 12)} cards / year · ₹${fmt(s.commission)}/card</div>
+      </div>
+    </div>
+
+    <!-- Split cards -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:20px">
+      <div style="background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:18px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#64748b">Fibe revenue</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px">${s.fibePct}% share</div>
+        <div style="font-size:30px;font-weight:800;color:#e2e8f0;margin-top:8px;line-height:1">${inrCr(fibeRev)}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px">per year</div>
+      </div>
+      <div style="background:rgba(0,103,103,0.15);border:1px solid rgba(0,103,103,0.35);border-radius:14px;padding:18px">
+        <div style="font-size:10px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:#64748b">GC revenue</div>
+        <div style="font-size:11px;color:#64748b;margin-top:2px">${100 - s.fibePct}% share</div>
+        <div style="font-size:30px;font-weight:800;color:#5eead4;margin-top:8px;line-height:1">${inrCr(gcRev)}</div>
+        <div style="font-size:11px;color:#64748b;margin-top:4px">per year</div>
+      </div>
+    </div>
+
+    <!-- GC P&L -->
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:14px;overflow:hidden">
+      <div style="padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <span style="font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#64748b">GC P&amp;L</span>
+      </div>
+      ${[
+        { label: 'Gross Revenue (GC share)', monthly: gcRev/12,          annual: gcRev,    color: '#5eead4', bold: false },
+        { label: 'Fixed Costs',              monthly: s.fixedCost,       annual: fixedAnn, color: '#94a3b8', bold: false },
+        { label: 'Net Profit',               monthly: (gcRev-fixedAnn)/12, annual: gcNet,  color: positive ? '#5eead4' : '#f87171', bold: true },
+      ].map(r => `
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,0.04);${r.bold ? 'background:rgba(255,255,255,0.03)' : ''}">
+          <div style="font-size:13px;color:${r.bold ? '#e2e8f0' : '#94a3b8'};font-weight:${r.bold ? '700' : '400'}">${r.label}</div>
+          <div style="font-size:13px;text-align:right;color:${r.color};font-weight:${r.bold ? '700' : '500'}">${inrCr(r.monthly)} / mo</div>
+          <div style="font-size:13px;text-align:right;color:${r.color};font-weight:${r.bold ? '800' : '500'}">${inrCr(r.annual)} / yr</div>
+        </div>
+      `).join('')}
+    </div>
+
+    <!-- Unit positive badge -->
+    <div style="margin-top:12px;padding:12px 16px;border-radius:10px;background:${positive ? 'rgba(94,234,212,0.08)' : 'rgba(248,113,113,0.08)'};border:1px solid ${positive ? 'rgba(94,234,212,0.2)' : 'rgba(248,113,113,0.2)'};font-size:13px;font-weight:600;color:${positive ? '#5eead4' : '#f87171'}">
+      ${positive
+        ? `✓ Unit positive · GC margin ${gcMargin}% · ₹${fmt(s.fixedCost)}/mo fixed costs covered`
+        : `✗ Below unit — lower fixed costs or negotiate a higher GC split`}
+    </div>
+
+    <!-- CTR reference -->
+    <div style="margin-top:20px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:12px;overflow:hidden">
+      <div style="padding:10px 16px;border-bottom:1px solid rgba(255,255,255,0.06)">
+        <span style="font-size:10px;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:#64748b">CTR benchmarks by placement</span>
+        <span style="font-size:11px;color:#475569;margin-left:8px">blended ${s.ctrPct}% = mix of active placements</span>
+      </div>
+      ${PLACEMENT_CTR_BENCH.map(p => `
+        <div style="display:grid;grid-template-columns:1fr 80px 1fr;padding:9px 16px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:12px">
+          <div style="color:#cbd5e1;font-weight:500">${p.name}</div>
+          <div style="color:#5eead4;font-weight:700;text-align:center">${p.ctr}</div>
+          <div style="color:#64748b">${p.note}</div>
+        </div>
+      `).join('')}
+    </div>
+  `;
 }
 
 function mountDeck() {}
